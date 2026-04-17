@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veritas | Real or Fake News Detector</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+    <main class="container">
+        <header class="header">
+            <div class="logo">Veritas</div>
+            <p class="subtitle">AI-Powered Disinformation Detection</p>
+        </header>
+
+        <section class="search-section">
+            <h1 class="hero-title">Uncover the <span class="gradient-text">Truth</span>.</h1>
+            <p class="hero-desc">Paste a claim, news headline, or excerpt below to instantly cross-reference with live web sources and deep-learning models.</p>
+            
+            <div class="search-box">
+                <textarea id="claimInput" placeholder="Enter the news claim here..." rows="3"></textarea>
+                <button id="analyzeBtn" class="btn-primary">
+                    <span class="btn-text">Analyze Claim</span>
+                    <svg class="btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <section id="loadingState" class="hidden">
+            <div class="cyber-scanner">
+                <div class="cyber-box">
+                    <div class="cyber-laser"></div>
+                    <!-- decorative center icon -->
+                    <div class="cyber-icon-wrapper">
+                        <svg class="cyber-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <h3 class="cyber-loading-title">Verification In Progress</h3>
+            <div class="cyber-progress-bar">
+                <div class="cyber-progress-fill" id="cyberProgressBar"></div>
+            </div>
+            <p id="loadingStatus" class="cyber-loading-status">Sequencing Claim DNA...</p>
+        </section>
+
+        <!-- Results State -->
+        <section id="resultState" class="hidden">
+
+            <!-- Claim display at top -->
+            <div class="card claim-display-card">
+                <span class="claim-display-label">📰 Analysed Claim</span>
+                <p id="claimDisplayText" class="claim-display-text"></p>
+            </div>
+
+            <div class="verdict-banner" id="verdictBanner">
+                <h2 id="verdictTitle">Likely Fake</h2>
+                <div class="confidence-bar-bg">
+                    <div class="confidence-bar-fill" id="confidenceBar"></div>
+                </div>
+                <p class="confidence-text">Confidence: <span id="confidenceScore">0%</span></p>
+            </div>
+
+            <div class="analysis-grid">
+                <div class="card explanation-card">
+                    <h3 id="headerWhyFake">Why is it Fake?</h3>
+                    <p id="explanationText">Loading explanation...</p>
+                </div>
+                <div class="card truth-card">
+                    <h3 id="headerTruth">The Actual Truth</h3>
+                    <p id="truthText">Loading truth...</p>
+                </div>
+            </div>
+
+            <div class="card breakdown-card">
+                <h3 id="headerCredibility">Credibility Breakdown</h3>
+                <div class="breakdown-stats">
+                    <div class="stat-item">
+                        <span class="stat-label" id="labelSource">Source Reliability</span>
+                        <span class="stat-value" id="statSource">Loading...</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="labelConsistency">Factual Consistency</span>
+                        <span class="stat-value" id="statConsistency">Loading...</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="labelFallacy">Logical Fallacies</span>
+                        <span class="stat-value" id="statFallacy">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Claim Analytics Dashboard -->
+            <div class="analytics-grid">
+                <div class="card virality-card">
+                    <h3 id="headerVirality">Virality Velocity</h3>
+                    <div class="virality-meter">
+                        <div class="virality-fill" id="viralityBar"></div>
+                    </div>
+                    <p class="virality-score"><span id="viralityScore">0</span>/10</p>
+                    <p id="viralityComment" class="analytics-comment">Loading...</p>
+                </div>
+                
+                <div class="card origin-card">
+                    <h3 id="headerOrigin">Origin Details</h3>
+                    <div class="origin-info">
+                        <div class="origin-row">
+                            <span class="origin-icon">📍</span>
+                            <span id="originPlatform">Loading...</span>
+                        </div>
+                        <div class="origin-row">
+                            <span class="origin-icon">⏳</span>
+                            <span id="originAge">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Web Sources above mutations -->
+            <div class="sources-list card">
+                <h3 id="headerSources">Live Web Sources (Tavily Fact-Check)</h3>
+                <ul id="sourcesContainer">
+                    <!-- Source items appended here via JS -->
+                </ul>
+            </div>
+
+            <div class="card mutations-card">
+                <h3 id="headerMutations">Known Mutations</h3>
+                <div class="mutations-list">
+                    <div class="mutation-item">
+                        <span class="lang-tag">Original</span>
+                        <p id="mutOriginal">Loading...</p>
+                        <a id="mutOriginalLink" href="#" target="_blank" class="mutation-link hidden">Source Link</a>
+                    </div>
+                    <div class="mutation-item">
+                        <span class="lang-tag">Hindi</span>
+                        <p id="mutHindi" class="hindi-text">Loading...</p>
+                        <a id="mutHindiLink" href="#" target="_blank" class="mutation-link hidden">Source Link</a>
+                    </div>
+                    <div class="mutation-item">
+                        <span class="lang-tag">Bengali</span>
+                        <p id="mutBengali" class="bengali-text">Loading...</p>
+                        <a id="mutBengaliLink" href="#" target="_blank" class="mutation-link hidden">Source Link</a>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Spread Timeline -->
+            <div class="card timeline-card">
+                <h3 class="timeline-header-title">SPREAD TIMELINE</h3>
+                <div id="timelineContainer" class="timeline-list">
+                    <!-- Timeline events injected by JS -->
+                </div>
+                <div class="timeline-velocity-row">
+                    <span class="timeline-velocity-label">virality velocity</span>
+                    <span id="timelineVelocityLabel" class="timeline-velocity-status">MODERATE</span>
+                </div>
+                <div class="timeline-velocity-bar-bg">
+                    <div id="timelineVelocityBar" class="timeline-velocity-bar"></div>
+                </div>
+            </div>
+
+            <div class="card map-card">
+                <div class="map-header">
+                    <h3 id="headerMap">Spread in India</h3>
+                    <button id="openGlobeBtn" class="btn-globe">
+                        <span>📡 View Network Graph</span>
+                    </button>
+                </div>
+                <div id="spreadMap" style="height: 380px; width: 100%; border-radius: 8px; z-index: 1;"></div>
+                <div class="map-footer">
+                    <p id="spreadPathHint" class="spread-path-hint hidden">📰 Tracking spread path across states...</p>
+                    <button id="replaySpreadBtn" class="btn-replay hidden">
+                        ↺ Replay Spread Animation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Globe Modal Overlay -->
+            <div id="globeModal" class="globe-modal hidden">
+                <div class="globe-modal-content">
+                    <div class="globe-modal-header">
+                        <h3>📡 Spread Network Graph</h3>
+                        <button id="closeGlobeBtn" class="globe-close-btn">✕</button>
+                    </div>
+                    <div id="globeContainer"></div>
+                    <p class="globe-hint">Drag to rotate • Scroll to zoom • Click a node for details</p>
+                </div>
+            </div>
+
+
+            <div class="result-actions">
+                <div class="translation-controls card">
+                    <span class="translate-label">Translate Output:</span>
+                    <select id="resultLangSelect" class="lang-select">
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="French">French</option>
+                        <option value="Arabic">Arabic</option>
+                    </select>
+                    <button id="translateBtn" class="btn-primary small-btn">Translate</button>
+                    <div id="translateLoading" class="hidden spinner-small"></div>
+                </div>
+                <button id="downloadReportBtn" class="btn-download">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download PDF Report
+                </button>
+                <button id="resetBtn" class="btn-secondary">Check Another Claim</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
