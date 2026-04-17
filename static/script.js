@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (data.mutations) {
-            const originalObj = typeof data.mutations.original === 'object' ? data.mutations.original : { text: data.mutations.original || claim, link: '#' };
+            const originalObj = typeof data.mutations.original === 'object' ? data.mutations.original : { text: data.mutations.original || lastClaim, link: '#' };
             const hindiObj = typeof data.mutations.hindi === 'object' ? data.mutations.hindi : { text: data.mutations.hindi || 'अनुवाद उपलब्ध नहीं', link: '#' };
             const bengaliObj = typeof data.mutations.bengali === 'object' ? data.mutations.bengali : { text: data.mutations.bengali || 'অনুবাদ উপলব্ধ নয়', link: '#' };
 
